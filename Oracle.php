@@ -69,11 +69,10 @@ class Oracle extends DboSource {
  */
 	protected $_baseConfig = array(
 		'persistent' => true,
-		'host' => '',
 		'login' => '',
 		'password' => '',
 		'database' => 'localhost/XE',
-		'schema' => '',
+		'encoding' => 'utf8',
 	);
 
 /**
@@ -120,14 +119,14 @@ class Oracle extends DboSource {
 			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
 		);
 
-        $charset = '';
+		$charset = '';
 		if (!empty($config['encoding'])) {
 			$charset = '; charset=' . $config['encoding'];
 		}
 
 		try {
 			$this->_connection = new PDO(
-				"oci:dbname={$config['database']}",
+				"oci:dbname={$config['database']}{$charset}",
 				$config['login'],
 				$config['password'],
 				$flags
@@ -672,86 +671,6 @@ class Oracle extends DboSource {
 	}
 
 /**
- * Inserts multiple values into a table
- *
- * @param string $table
- * @param string $fields
- * @param array $values
- * @return void
- */
-	public function insertMulti($table, $fields, $values) {
-		$primaryKey = $this->_getPrimaryKey($table);
-		$hasPrimaryKey = $primaryKey && (
-			(is_array($fields) && in_array($primaryKey, $fields)
-			|| (is_string($fields) && strpos($fields, $this->startQuote . $primaryKey . $this->endQuote) !== false))
-		);
-
-		if ($hasPrimaryKey) {
-			$this->_execute('SET IDENTITY_INSERT ' . $this->fullTableName($table) . ' ON');
-		}
-
-		parent::insertMulti($table, $fields, $values);
-
-		if ($hasPrimaryKey) {
-			$this->_execute('SET IDENTITY_INSERT ' . $this->fullTableName($table) . ' OFF');
-		}
-	}
-
-/**
- * Generate a database-native column schema string
- *
- * @param array $column An array structured like the
- *   following: array('name'=>'value', 'type'=>'value'[, options]),
- *   where options can be 'default', 'length', or 'key'.
- * @return string
- */
-	public function buildColumn($column) {
-		$result = parent::buildColumn($column);
-		$result = preg_replace('/(bigint|int|integer)\([0-9]+\)/i', '$1', $result);
-		$result = preg_replace('/(bit)\([0-9]+\)/i', '$1', $result);
-		if (strpos($result, 'DEFAULT NULL') !== false) {
-			if (isset($column['default']) && $column['default'] === '') {
-				$result = str_replace('DEFAULT NULL', "DEFAULT ''", $result);
-			} else {
-				$result = str_replace('DEFAULT NULL', 'NULL', $result);
-			}
-		} elseif (array_keys($column) == array('type', 'name')) {
-			$result .= ' NULL';
-		} elseif (strpos($result, "DEFAULT N'")) {
-			$result = str_replace("DEFAULT N'", "DEFAULT '", $result);
-		}
-		return $result;
-	}
-
-/**
- * Format indexes for create table
- *
- * @param array $indexes
- * @param string $table
- * @return string
- */
-	public function buildIndex($indexes, $table = null) {
-		$join = array();
-
-		foreach ($indexes as $name => $value) {
-			if ($name === 'PRIMARY') {
-				$join[] = 'PRIMARY KEY (' . $this->name($value['column']) . ')';
-			} elseif (isset($value['unique']) && $value['unique']) {
-				$out = "ALTER TABLE {$table} ADD CONSTRAINT {$name} UNIQUE";
-
-				if (is_array($value['column'])) {
-					$value['column'] = implode(', ', array_map(array(&$this, 'name'), $value['column']));
-				} else {
-					$value['column'] = $this->name($value['column']);
-				}
-				$out .= "({$value['column']});";
-				$join[] = $out;
-			}
-		}
-		return $join;
-	}
-
-/**
  * Makes sure it will return the primary key
  *
  * @param Model|string $model Model instance of table name
@@ -815,24 +734,4 @@ class Oracle extends DboSource {
 			throw $e;
 		}
 	}
-
-/**
- * Generate a "drop table" statement for the given table
- *
- * @param type $table Name of the table to drop
- * @return string Drop table SQL statement
- */
-	protected function _dropTable($table) {
-		return "IF OBJECT_ID('" . $this->fullTableName($table, false) . "', 'U') IS NOT NULL DROP TABLE " . $this->fullTableName($table) . ";";
-	}
-
-/**
- * Gets the schema name
- *
- * @return string The schema name
- */
-	public function getSchemaName() {
-		return $this->config['schema'];
-	}
-
 }
