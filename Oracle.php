@@ -116,7 +116,9 @@ class Oracle extends DboSource {
 
 		$flags = array(
 			PDO::ATTR_PERSISTENT => $config['persistent'],
-			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+			PDO::ATTR_ORACLE_NULLS => true,
+			PDO::NULL_EMPTY_STRING => true,
 		);
 
 		$charset = '';
