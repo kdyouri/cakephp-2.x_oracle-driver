@@ -12,7 +12,7 @@ The master branch has the following requirements:
 ## Installation
 
 * Clone/Copy the files in this directory into `app\Model\Datasource\Database\`
-* Set database config file `app\Config\database.php` looks like :
+* Set database config file `app\Config\database.php` as :
 ```
 <?php
 class DATABASE_CONFIG {
