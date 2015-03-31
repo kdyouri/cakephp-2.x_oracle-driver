@@ -131,6 +131,10 @@ class Oracle extends DboSource {
 				$config['password'],
 				$flags
 			);
+
+			$sql = "ALTER SESSION SET NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS' NLS_TIMESTAMP_FORMAT='YYYY-MM-DD HH24:MI:SS' NLS_TIMESTAMP_TZ_FORMAT='YYYY-MM-DD HH24:MI:SS'";
+			$this->_connection->exec($sql);
+
 			$this->connected = true;
 		} catch (PDOException $e) {
 			throw new MissingConnectionException(array(
