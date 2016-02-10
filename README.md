@@ -36,4 +36,5 @@ class DATABASE_CONFIG {
   Warning (2): PDOStatement::fetch(): column 5 data was too large for buffer and was truncated to fit it
   [APP\Model\Datasource\Database\Oracle.php, line 662]
 
-  Thats is not a bug from this driver, is a PDO_OCI error.
+  Thats is not a bug from this driver, is a PDO_OCI error:
+  https://bugs.php.net/bug.php?id=54379&edit=1
