@@ -6,6 +6,7 @@
  */
 
 App::uses('DboSource', 'Model/Datasource');
+App::uses('String', 'Utility');
 
 /**
  * Dbo layer for OCI driver
@@ -615,7 +616,7 @@ class Oracle extends DboSource {
  * @param string $column The column into which this data will be inserted
  * @return string Quoted and escaped data
  */
-	public function value($data, $column = null) {
+	public function value($data, $column = null, $null = true) {
 		if ($data === null || is_array($data) || is_object($data)) {
 			return parent::value($data, $column);
 		}
