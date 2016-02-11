@@ -38,3 +38,5 @@ class DATABASE_CONFIG {
 
   Thats is not a bug from this driver, is a PDO_OCI error:
   https://bugs.php.net/bug.php?id=54379&edit=1
+  
+  You can use https://github.com/alphp/Oracle-cake2 that uses OCI instead of PDO.
